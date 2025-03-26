@@ -1,12 +1,13 @@
 package com.example.PatientManagementWeb.Entity;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import jakarta.persistence.Entity;
+import lombok.*;
+
 
 @NoArgsConstructor
 @AllArgsConstructor
+@Getter
+@Setter
 @Data
 
 public class Patient extends User{
@@ -16,6 +17,7 @@ public class Patient extends User{
     private String gender;
     private String address;
     private Long phone;
+    private String medicalHistory;
 
 
 
