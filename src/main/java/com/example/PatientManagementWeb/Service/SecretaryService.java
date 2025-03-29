@@ -1,22 +1,34 @@
 package com.example.PatientManagementWeb.Service;
 
 import com.example.PatientManagementWeb.DTO.SecretaryDTO;
+import com.example.PatientManagementWeb.Entity.Medecin;
 import com.example.PatientManagementWeb.Entity.Secretary;
 import com.example.PatientManagementWeb.Exceptions.UserNotFoundException;
 import com.example.PatientManagementWeb.IService.ISecretaryService;
+import com.example.PatientManagementWeb.Repository.MedecinRepository;
 import com.example.PatientManagementWeb.Repository.SecretaryRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class SecretaryService implements ISecretaryService {
+
     private final SecretaryRepository secretaryRepository;
     private final PasswordEncoder passwordEncoder;
+    private final MedecinRepository medecinRepository;
 
+
+    @Override
+    public List<SecretaryDTO> getAllSecretaries() {
+        return secretaryRepository.findAll()
+                .stream().map(secretary -> toDTO(secretary)).collect(Collectors.toList());
+    }
 
     @Override
     public SecretaryDTO getSecretary(String id) {
@@ -28,12 +40,16 @@ public class SecretaryService implements ISecretaryService {
 
     @Override
     public void createSecretary(SecretaryDTO secretaryDTO) {
+        Medecin medecin= medecinRepository.findById(UUID.fromString(secretaryDTO.getMedecinId()))
+                .orElseThrow(()-> new UserNotFoundException("Medecin not found"));
+
         Secretary secretary= Secretary.builder()
                 .username(secretaryDTO.getUsername())
                 .password(passwordEncoder.encode(secretaryDTO.getPassword()))
                 .firstName(secretaryDTO.getFirstName())
                 .lastName(secretaryDTO.getLastName())
                 .phone(secretaryDTO.getPhone())
+                .medecin(medecin)
                 .departament(secretaryDTO.getDepartament())
                 .build();
         secretaryRepository.save(secretary);

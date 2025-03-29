@@ -1,5 +1,6 @@
 package com.example.PatientManagementWeb.Service;
 
+import com.example.PatientManagementWeb.DTO.MedecinDTO;
 import com.example.PatientManagementWeb.DTO.PatientDTO;
 import com.example.PatientManagementWeb.Entity.Medecin;
 import com.example.PatientManagementWeb.Entity.Patient;
@@ -64,12 +65,16 @@ public class PatientService implements IPatientService {
 
     @Override
     public void createPatient(PatientDTO patientDTO) {
+        Medecin medecin= medecinRepository.findById(UUID.fromString(patientDTO.getMedecinId()))
+                .orElseThrow(()-> new UserNotFoundException("medecin not found"));
+
         Patient patient= Patient.builder()
                 .username(patientDTO.getUsername())
                 .password(passwordEncoder.encode(patientDTO.getPassword()))
                 .firstName(patientDTO.getFirstName())
                 .lastName(patientDTO.getLastName())
                 .phone(patientDTO.getPhone())
+                .medecin(medecin)
                 .age(patientDTO.getAge())
                 .gender(patientDTO.getGender())
                 .medicalHistory(patientDTO.getMedicalHistory())

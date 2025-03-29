@@ -2,6 +2,7 @@ package com.example.PatientManagementWeb.Controller;
 
 import com.example.PatientManagementWeb.DTO.MedecinDTO;
 import com.example.PatientManagementWeb.Service.MedecinService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -33,13 +34,13 @@ public class MedecinController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Void> updateMedecin(@PathVariable String id, @RequestBody MedecinDTO medecinDTO) {
+    public ResponseEntity<Void> updateMedecin(@PathVariable String id, @RequestBody @Valid MedecinDTO medecinDTO) {
         medecinService.updateMedecin(medecinDTO, id);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
     @PostMapping
-    public ResponseEntity<Void> createMedecin(@RequestBody MedecinDTO medecinDTO) {
+    public ResponseEntity<Void> createMedecin(@RequestBody @Valid MedecinDTO medecinDTO) {
         medecinService.createMedecin(medecinDTO);
         return new ResponseEntity<>(HttpStatus.CREATED);
     }

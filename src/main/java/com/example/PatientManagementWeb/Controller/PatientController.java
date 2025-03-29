@@ -2,6 +2,7 @@ package com.example.PatientManagementWeb.Controller;
 
 import com.example.PatientManagementWeb.DTO.PatientDTO;
 import com.example.PatientManagementWeb.Service.PatientService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -27,21 +28,21 @@ public class PatientController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<String> deletePatient(@PathVariable String id) {
+    public ResponseEntity<Void> deletePatient(@PathVariable String id) {
         patientService.deletePatient(id);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Void> updatePatient(@PathVariable String id, @RequestBody PatientDTO patientDTO) {
+    public ResponseEntity<Void> updatePatient(@PathVariable String id, @RequestBody @Valid PatientDTO patientDTO) {
         patientService.updatePatient(patientDTO,id);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
     @PostMapping
-    public ResponseEntity<PatientDTO> createPatient(@RequestBody PatientDTO patientDTO) {
+    public ResponseEntity<Void> createPatient(@RequestBody @Valid PatientDTO patientDTO) {
         patientService.createPatient(patientDTO);
-        return new ResponseEntity<>(patientDTO, HttpStatus.CREATED);
+        return new ResponseEntity<>( HttpStatus.CREATED);
     }
 
 }
