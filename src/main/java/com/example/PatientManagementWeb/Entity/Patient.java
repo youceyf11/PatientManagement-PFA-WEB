@@ -1,22 +1,26 @@
 package com.example.PatientManagementWeb.Entity;
 
-import jakarta.persistence.Entity;
 import lombok.*;
+
+import jakarta.persistence.Entity;
+import jakarta.persistence.ManyToOne;
+import lombok.experimental.SuperBuilder;
 
 
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
 @Setter
-@Data
-
+@Entity
+@SuperBuilder
 public class Patient extends User{
 
+    @ManyToOne
     private Medecin medecin;
+
     private int age;
     private String gender;
     private String address;
-    private Long phone;
     private String medicalHistory;
 
 

@@ -1,43 +1,48 @@
 package com.example.PatientManagementWeb.Controller;
 
-import com.example.PatientManagementWeb.Entity.Medecin;
-import com.example.PatientManagementWeb.IService.IMedecinService;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.example.PatientManagementWeb.DTO.MedecinDTO;
+import com.example.PatientManagementWeb.Service.MedecinService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.UUID;
 
 @RestController
-@RequestMapping("/medecins")
+@RequiredArgsConstructor
+@RequestMapping("/api/medecins")
 public class MedecinController {
 
-    @Autowired
-    private IMedecinService medecinService;
+    private final MedecinService medecinService;
 
     @GetMapping
-    public List<Medecin> getAllMedecins() {
-        return medecinService.getAllMedecins();
+    public ResponseEntity<List<MedecinDTO>> getAllMedecins() {
+        return new ResponseEntity<>(medecinService.getAllMedecins(), HttpStatus.OK);
     }
 
     @GetMapping("/{id}")
-    public Medecin getMedecinById(@PathVariable UUID id) {
-        return medecinService.findMedecinById(id);
-    }
-
-    @PostMapping
-    public Medecin createMedecin(@RequestBody Medecin medecin) {
-        return medecinService.createMedecin(medecin);
+    public ResponseEntity<MedecinDTO> getMedecin(@PathVariable String id) {
+        return new ResponseEntity<>(medecinService.getMedecin(id), HttpStatus.OK);
     }
 
     @DeleteMapping("/{id}")
-    public void deleteMedecin(@PathVariable UUID id) {
+    public ResponseEntity<Void> deleteMedecin(@PathVariable String id) {
         medecinService.deleteMedecin(id);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
-    @PutMapping
-    public Medecin updateMedecin(@RequestBody Medecin medecin) {
-        return medecinService.updateMedecin(medecin);
+    @PutMapping("/{id}")
+    public ResponseEntity<Void> updateMedecin(@PathVariable String id, @RequestBody MedecinDTO medecinDTO) {
+        medecinService.updateMedecin(medecinDTO, id);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
+
+    @PostMapping
+    public ResponseEntity<Void> createMedecin(@RequestBody MedecinDTO medecinDTO) {
+        medecinService.createMedecin(medecinDTO);
+        return new ResponseEntity<>(HttpStatus.CREATED);
+    }
+
 
 }

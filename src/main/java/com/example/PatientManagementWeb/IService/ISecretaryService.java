@@ -1,16 +1,15 @@
 package com.example.PatientManagementWeb.IService;
 
-import com.example.PatientManagementWeb.Entity.Medecin;
-import com.example.PatientManagementWeb.Entity.Secretary;
+import com.example.PatientManagementWeb.DTO.SecretaryDTO;
 
-import java.util.List;
-import java.util.UUID;
 
 public interface ISecretaryService {
 
-    List<Secretary> findAllSecretaries();
-    Secretary findSecretaryById(UUID id);
-    Secretary createSecretary(Secretary secretary);
-    Secretary updateSecretary(Secretary secretary);
-    void deleteSecretary(UUID id);
+
+    SecretaryDTO getSecretary(String id);
+    void createSecretary(SecretaryDTO secretaryDTO);
+    void updateSecretary(SecretaryDTO secretaryDTO, String id);
+    void deleteSecretary(String id);
+
+
 }

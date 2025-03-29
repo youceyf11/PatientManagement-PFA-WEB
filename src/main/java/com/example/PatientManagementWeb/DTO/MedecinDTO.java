@@ -1,18 +1,15 @@
-package com.example.PatientManagementWeb.Entity;
+package com.example.PatientManagementWeb.DTO;
 
-import jakarta.persistence.Entity;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 
-@Entity
+
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @SuperBuilder
-public class Medecin extends User {
-
+public class MedecinDTO extends UserDTO{
     private String specialty;
     private String location;
-
 }

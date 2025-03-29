@@ -1,44 +1,44 @@
 package com.example.PatientManagementWeb.Controller;
 
-import com.example.PatientManagementWeb.Entity.Secretary;
-import com.example.PatientManagementWeb.IService.ISecretaryService;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.example.PatientManagementWeb.DTO.SecretaryDTO;
+import com.example.PatientManagementWeb.Service.SecretaryService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-import java.util.UUID;
 
 @RestController
-@RequestMapping("/secretaries")
-
+@RequiredArgsConstructor
+@RequestMapping("/api/secretaries")
 public class SecretaryController {
 
-    @Autowired
-    private ISecretaryService secretaryService;
-
-    @GetMapping
-    public List<Secretary> getAllSecretaries(){
-        return secretaryService.findAllSecretaries();
-    }
+    private final SecretaryService secretaryService;
 
     @GetMapping("/{id}")
-    public Secretary getSecretaryById(@PathVariable UUID id){
-        return secretaryService.findSecretaryById(id);
+    public ResponseEntity<SecretaryDTO> getSecretary(@PathVariable String id) {
+        return new ResponseEntity<>(secretaryService.getSecretary(id), HttpStatus.OK);
     }
 
     @PostMapping
-    public Secretary createSecretary(@RequestBody Secretary secretary){
-        return secretaryService.createSecretary(secretary);
-    }
-
-    @PutMapping
-    public Secretary updateSecretary(@RequestBody Secretary secretary){
-        return secretaryService.updateSecretary(secretary);
+    public ResponseEntity<SecretaryDTO> createSecretary(@RequestBody SecretaryDTO secretaryDTO) {
+        secretaryService.createSecretary(secretaryDTO);
+        return new ResponseEntity<>(secretaryDTO, HttpStatus.CREATED);
     }
 
     @DeleteMapping("/{id}")
-    public void deleteSecretary(@PathVariable UUID id){
+    public ResponseEntity<SecretaryDTO> deleteSecretary(@PathVariable String id) {
         secretaryService.deleteSecretary(id);
+        return new ResponseEntity<>(secretaryService.getSecretary(id), HttpStatus.NO_CONTENT);
     }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<SecretaryDTO> updateSecretary(@PathVariable String id, @RequestBody SecretaryDTO secretaryDTO) {
+        secretaryService.updateSecretary(secretaryDTO,id);
+        return new ResponseEntity<>(secretaryDTO, HttpStatus.NO_CONTENT);
+    }
+
+
+
 
 }

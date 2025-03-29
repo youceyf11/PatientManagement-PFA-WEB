@@ -1,22 +1,26 @@
 package com.example.PatientManagementWeb.Entity;
 
-import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
+import lombok.*;
+import lombok.experimental.SuperBuilder;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
+import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-@MappedSuperclass
+@Entity
+@Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
 @AllArgsConstructor
 @NoArgsConstructor
-@Builder
-@Data
+@Getter
+@Setter
+@Table(name = "users")
+@EntityListeners(AuditingEntityListener.class)
+@SuperBuilder
 public class User {
+
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     protected UUID id;   //so all the subclasses can access to the variable
@@ -25,10 +29,12 @@ public class User {
 
     protected String firstName;
     protected String lastName;
+    protected String phone;
 
-    @CreationTimestamp
+
+    @CreatedDate
     protected LocalDateTime createdAt;
 
-    @UpdateTimestamp
+    @LastModifiedDate
     protected LocalDateTime updatedAt;
 }

@@ -1,15 +1,15 @@
 package com.example.PatientManagementWeb.IService;
 
-import com.example.PatientManagementWeb.Entity.Medecin;
+
+import com.example.PatientManagementWeb.DTO.MedecinDTO;
 
 import java.util.List;
-import java.util.UUID;
 
 public interface IMedecinService {
+        List<MedecinDTO> getAllMedecins();
+        MedecinDTO getMedecin(String id);
+        void deleteMedecin(String id);
+        void updateMedecin(MedecinDTO medecinDTO, String id);
+        void createMedecin(MedecinDTO medecinDTO);
 
-    List<Medecin> getAllMedecins();
-    Medecin createMedecin(Medecin medecin);
-    Medecin findMedecinById(UUID id);
-    Medecin updateMedecin(Medecin medecin);
-    void deleteMedecin(UUID id);
 }
