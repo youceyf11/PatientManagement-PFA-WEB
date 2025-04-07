@@ -2,9 +2,13 @@ package com.example.PatientManagementWeb.Service;
 
 import com.example.PatientManagementWeb.DTO.MedecinDTO;
 import com.example.PatientManagementWeb.Entity.Medecin;
-import com.example.PatientManagementWeb.Exceptions.UserNotFoundException;
+import com.example.PatientManagementWeb.Enum.ErrorCode;
+import com.example.PatientManagementWeb.Exceptions.ProfessionalException;
+import com.example.PatientManagementWeb.Exceptions.TechnicalException;
 import com.example.PatientManagementWeb.IService.IMedecinService;
 import com.example.PatientManagementWeb.Repository.MedecinRepository;
+import com.example.PatientManagementWeb.mapper.MedecinMapper;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -19,66 +23,69 @@ public class MedecinService implements IMedecinService {
 
     private final MedecinRepository medecinRepository;
     private final PasswordEncoder passwordEncoder;
+    private final MedecinMapper medecinMapper;
 
 
     @Override
     public List<MedecinDTO> getAllMedecins() {
-        return medecinRepository.findAll()
-                .stream().map(medecin -> toDTO(medecin)).collect(Collectors.toList());
+        try {
+            return medecinRepository.findAll()
+                    .stream().map(medecinMapper::toDTO)
+                    .collect(Collectors.toList());
+        }catch (Exception e){
+            throw new TechnicalException(ErrorCode.DATABASE_ERROR);
+        }
     }
 
     @Override
     public MedecinDTO getMedecin(String id) {
-        return medecinRepository.findById(UUID.fromString(id))
-                .map(medecin -> toDTO(medecin)).orElseThrow(() -> new UserNotFoundException("User not found"));
+        Medecin medecin = medecinRepository.findById(UUID.fromString(id))
+                .orElseThrow(() -> new ProfessionalException(ErrorCode.MEDECIN_NOT_FOUND));
+        try {
+            return medecinRepository.findById(UUID.fromString(id))
+                    .map(medecinMapper::toDTO)
+                    .orElseThrow(() -> new ProfessionalException(ErrorCode.MEDECIN_NOT_FOUND, "ID:" + id));
+        }catch (Exception e){
+            throw new TechnicalException(ErrorCode.DATABASE_ERROR);
+        }
     }
 
     @Override
+    @Transactional
     public void deleteMedecin(String id) {
         if(!medecinRepository.existsById(UUID.fromString(id))){
-            throw new UserNotFoundException("User not found");
+            throw new ProfessionalException(ErrorCode.MEDECIN_NOT_FOUND,"ID:"+ id);
         }
-        medecinRepository.deleteById(UUID.fromString(id));
+        try {
+            medecinRepository.deleteById(UUID.fromString(id));
+        }catch (Exception e){
+            throw new TechnicalException(ErrorCode.DATABASE_ERROR);
+        }
     }
 
     @Override
+    @Transactional
     public void updateMedecin(MedecinDTO medecinDTO, String id) {
         Medecin medecin= medecinRepository.findById(UUID.fromString(id))
-                .orElseThrow(() -> new UserNotFoundException("Medecin not found"));
-        medecin.setFirstName(medecinDTO.getFirstName());
-        medecin.setLastName(medecinDTO.getLastName());
-        medecin.setPhone(medecinDTO.getPhone());
-        medecin.setSpecialty(medecinDTO.getSpecialty());
-        medecin.setLocation( medecinDTO.getLocation());
-        medecinRepository.save(medecin);
+                .orElseThrow(() -> new ProfessionalException(ErrorCode.MEDECIN_NOT_FOUND,"ID:"+ id));
+        try {
+            //medecinDTO.setId(id);
+            medecinMapper.updateMedecinFromDTO(medecinDTO, medecin);
+            medecinRepository.save(medecin);
+        }catch (Exception e){
+            throw new TechnicalException(ErrorCode.DATABASE_ERROR);
+        }
     }
 
     @Override
+    @Transactional
     public void createMedecin(MedecinDTO medecinDTO) {
-        Medecin medecin = Medecin.builder()
-                .username(medecinDTO.getUsername())
-                .password(passwordEncoder.encode(medecinDTO.getPassword()))
-                .firstName(medecinDTO.getFirstName())
-                .lastName(medecinDTO.getLastName())
-                .phone(medecinDTO.getPhone())
-                .specialty(medecinDTO.getSpecialty())
-                .location(medecinDTO.getLocation())
-                .build();
+        try {
+        Medecin medecin = medecinMapper.toEntity(medecinDTO);
+        medecin.setPassword(passwordEncoder.encode(medecin.getPassword()));
         medecinRepository.save(medecin);
+    }catch (Exception e){
+        throw new TechnicalException(ErrorCode.DATABASE_ERROR);}
     }
 
-    private MedecinDTO toDTO (Medecin medecin) {
-        return MedecinDTO.builder()
-                .id(medecin.getId().toString())
-                .username(medecin.getUsername())
-                .password(medecin.getPassword())
-                .firstName(medecin.getFirstName())
-                .lastName(medecin.getLastName())
-                .phone(medecin.getPhone())
-                .createdAt(medecin.getCreatedAt().toString())
-                .updatedAt(medecin.getUpdatedAt().toString())
-                .specialty(medecin.getSpecialty())
-                .location(medecin.getLocation())
-                .build();
-    }
 }

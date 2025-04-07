@@ -10,6 +10,7 @@ import lombok.experimental.SuperBuilder;
 @AllArgsConstructor
 @NoArgsConstructor
 public class UserDTO {
+    @NonNull
     private String id;
 
     @NotBlank(message = "username is mandatory")
@@ -29,5 +30,6 @@ public class UserDTO {
 
     private String createdAt;
     private String updatedAt;
+
 
 }

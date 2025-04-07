@@ -12,7 +12,6 @@ import lombok.experimental.SuperBuilder;
 @SuperBuilder
 public class MedecinDTO extends UserDTO{
 
-    @NotBlank(message = "speciality is mandatory")
     private String specialty;
 
     @NotBlank(message = "localisation is mandatory")

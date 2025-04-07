@@ -1,37 +1,62 @@
 package com.example.PatientManagementWeb.ExceptionHandler;
 
-import com.example.PatientManagementWeb.Exceptions.IncorrectPassword;
-import com.example.PatientManagementWeb.Exceptions.InvalidUsername;
-import com.example.PatientManagementWeb.Exceptions.UserNotFoundException;
+import com.example.PatientManagementWeb.Exceptions.ProfessionalException;
+import com.example.PatientManagementWeb.Exceptions.TechnicalException;
+import com.example.PatientManagementWeb.Service.MessageService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 @RestControllerAdvice
+@RequiredArgsConstructor
 public class GlobalExceptionHandler {
 
-    @ExceptionHandler(UserNotFoundException.class)
-    public ResponseEntity<String> handleException(UserNotFoundException userNotFoundException) {
-        return new ResponseEntity<>(userNotFoundException.getMessage(), HttpStatus.NOT_FOUND);
+    private final MessageService messageService;
+
+    @ExceptionHandler(ProfessionalException.class)
+    public ResponseEntity<String> handleProfessionalException(ProfessionalException ex) {
+        String message = ex.getErrorCode() != null ?
+                messageService.getErrorMessage(ex.getErrorCode()) :
+                ex.getMessage();
+
+        return new ResponseEntity<>(message, HttpStatus.BAD_REQUEST);
     }
 
-    @ExceptionHandler({IncorrectPassword.class, InvalidUsername.class})
-    public ResponseEntity<String> handleException(RuntimeException exception) {
-        return new ResponseEntity<>(exception.getMessage(), HttpStatus.BAD_REQUEST);
+    //@ExceptionHandler(TechnicalException.class)
+    public ResponseEntity<String> handleTechnicalException(TechnicalException ex) {
+        String message = ex.getErrorCode() != null ?
+                messageService.getErrorMessage(ex.getErrorCode()) :
+                ex.getMessage();
+
+        return new ResponseEntity<>(message, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<String> handleException(MethodArgumentNotValidException exception) {
-        StringBuilder errorMessage = new StringBuilder("Validation failed: \n");
-        exception.getBindingResult().getFieldErrors().forEach(error -> {
-            errorMessage.append(error.getField())
-                    .append(" - ")
-                    .append(error.getDefaultMessage())
-                    .append("\n");
-        });
-        return new ResponseEntity<>(errorMessage.toString(), HttpStatus.BAD_REQUEST);
+    public ResponseEntity<String> handleValidationException(MethodArgumentNotValidException ex) {
+        return new ResponseEntity<>("Erreur de validation dans les données fournies",
+                HttpStatus.BAD_REQUEST);
     }
 
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<String> handleHttpMessageNotReadableException(HttpMessageNotReadableException ex) {
+        return new ResponseEntity<>("Le corps de la requête est manquant ou mal formaté",
+                HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
+    public ResponseEntity<String> handleMethodNotSupportedException(HttpRequestMethodNotSupportedException ex) {
+        return new ResponseEntity<>("Méthode HTTP non supportée",
+                HttpStatus.METHOD_NOT_ALLOWED);
+    }
+
+    //@ExceptionHandler(Exception.class)
+    public ResponseEntity<String> handleGenericException(Exception ex) {
+        return new ResponseEntity<>(ex.getMessage(),
+                HttpStatus.INTERNAL_SERVER_ERROR);
+    }
 }

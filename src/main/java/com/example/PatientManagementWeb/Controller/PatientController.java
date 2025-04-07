@@ -29,7 +29,7 @@ public class PatientController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deletePatient(@PathVariable String id) {
-        patientService.deletePatient(id);
+        this.patientService.deletePatient(id);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 

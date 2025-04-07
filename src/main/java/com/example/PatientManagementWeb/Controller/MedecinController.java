@@ -40,7 +40,7 @@ public class MedecinController {
     }
 
     @PostMapping
-    public ResponseEntity<Void> createMedecin(@RequestBody @Valid MedecinDTO medecinDTO) {
+    public ResponseEntity<Void> createMedecin(@RequestBody  MedecinDTO medecinDTO) {
         medecinService.createMedecin(medecinDTO);
         return new ResponseEntity<>(HttpStatus.CREATED);
     }

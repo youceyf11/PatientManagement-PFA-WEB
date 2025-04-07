@@ -3,10 +3,14 @@ package com.example.PatientManagementWeb.Service;
 import com.example.PatientManagementWeb.DTO.SecretaryDTO;
 import com.example.PatientManagementWeb.Entity.Medecin;
 import com.example.PatientManagementWeb.Entity.Secretary;
-import com.example.PatientManagementWeb.Exceptions.UserNotFoundException;
+import com.example.PatientManagementWeb.Enum.ErrorCode;
+import com.example.PatientManagementWeb.Exceptions.ProfessionalException;
+import com.example.PatientManagementWeb.Exceptions.TechnicalException;
 import com.example.PatientManagementWeb.IService.ISecretaryService;
 import com.example.PatientManagementWeb.Repository.MedecinRepository;
 import com.example.PatientManagementWeb.Repository.SecretaryRepository;
+import com.example.PatientManagementWeb.mapper.SecretaryMapper;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -22,71 +26,71 @@ public class SecretaryService implements ISecretaryService {
     private final SecretaryRepository secretaryRepository;
     private final PasswordEncoder passwordEncoder;
     private final MedecinRepository medecinRepository;
+    private final SecretaryMapper secretaryMapper;
 
 
     @Override
     public List<SecretaryDTO> getAllSecretaries() {
-        return secretaryRepository.findAll()
-                .stream().map(secretary -> toDTO(secretary)).collect(Collectors.toList());
+       try{
+           return secretaryRepository.findAll()
+                   .stream().map(secretaryMapper::toDTO).collect(Collectors.toList());
+       }catch (Exception e){
+           throw new TechnicalException(ErrorCode.DATABASE_ERROR);
+       }
     }
 
     @Override
     public SecretaryDTO getSecretary(String id) {
-        return secretaryRepository.findById(UUID.fromString(id))
-                .map(secretary -> toDTO(secretary))
-                .orElseThrow(() -> new UserNotFoundException("Secretary not found"));
-
+        try {
+            return secretaryRepository.findById(UUID.fromString(id))
+                    .map(secretaryMapper::toDTO)
+                    .orElseThrow(() -> new ProfessionalException(ErrorCode.SECRETARY_NOT_FOUND));
+        }catch (Exception e){
+            throw new TechnicalException(ErrorCode.DATABASE_ERROR);
+        }
     }
 
     @Override
     public void createSecretary(SecretaryDTO secretaryDTO) {
         Medecin medecin= medecinRepository.findById(UUID.fromString(secretaryDTO.getMedecinId()))
-                .orElseThrow(()-> new UserNotFoundException("Medecin not found"));
-
-        Secretary secretary= Secretary.builder()
-                .username(secretaryDTO.getUsername())
-                .password(passwordEncoder.encode(secretaryDTO.getPassword()))
-                .firstName(secretaryDTO.getFirstName())
-                .lastName(secretaryDTO.getLastName())
-                .phone(secretaryDTO.getPhone())
-                .medecin(medecin)
-                .departament(secretaryDTO.getDepartament())
-                .build();
-        secretaryRepository.save(secretary);
+                .orElseThrow(()-> new ProfessionalException(ErrorCode.MEDECIN_NOT_FOUND));
+        /*if(secretaryRepository.findByMedecin(medecin)){
+            throw new ProfessionalException(ErrorCode.SECRETARY_ALREADY_EXIST);
+        } */
+        try {
+            Secretary secretary = secretaryMapper.toEntity(secretaryDTO);
+            secretary.setPassword(passwordEncoder.encode(secretary.getPassword()));
+            secretaryRepository.save(secretary);
+        }catch (Exception e){
+            throw new TechnicalException(ErrorCode.DATABASE_ERROR);
+        }
     }
 
     @Override
+    @Transactional
     public void updateSecretary(SecretaryDTO secretaryDTO, String id) {
         Secretary secretary= secretaryRepository.findById(UUID.fromString(id))
-                .orElseThrow(() -> new UserNotFoundException("Secretary not found"));
-        secretary.setFirstName(secretaryDTO.getFirstName());
-        secretary.setLastName(secretaryDTO.getLastName());
-        secretary.setPhone(secretaryDTO.getPhone());
-        secretary.setDepartament(secretaryDTO.getDepartament());
-        secretaryRepository.save(secretary);
+                .orElseThrow(() -> new ProfessionalException(ErrorCode.SECRETARY_NOT_FOUND));
+        try {
+            secretaryMapper.updateSecretaryFromDTO(secretaryDTO, secretary);
+            secretaryRepository.save(secretary);
+        }catch (Exception e){
+            throw new TechnicalException(ErrorCode.DATABASE_ERROR);
+        }
     }
 
     @Override
+    @Transactional
     public void deleteSecretary(String id) {
         if(!secretaryRepository.existsById(UUID.fromString(id))){
-            throw new UserNotFoundException("Secretary not found");
+            throw new ProfessionalException(ErrorCode.SECRETARY_NOT_FOUND);
         }
-        secretaryRepository.deleteById(UUID.fromString(id));
+        try {
+            secretaryRepository.deleteById(UUID.fromString(id));
+        }catch(Exception e){
+            throw new TechnicalException(ErrorCode.DATABASE_ERROR);
+        }
     }
 
 
-    private SecretaryDTO toDTO(Secretary secretary) {
-        return SecretaryDTO.builder()
-                .id(secretary.getId().toString())
-                .username(secretary.getUsername())
-                .password(passwordEncoder.encode(secretary.getPassword()))
-                .firstName(secretary.getFirstName())
-                .lastName(secretary.getLastName())
-                .phone(secretary.getPhone())
-                .createdAt(secretary.getCreatedAt().toString())
-                .updatedAt(secretary.getUpdatedAt().toString())
-                .medecinId(secretary.getMedecin().getId().toString())
-                .departament(secretary.getDepartament())
-                .build();
-    }
 }
