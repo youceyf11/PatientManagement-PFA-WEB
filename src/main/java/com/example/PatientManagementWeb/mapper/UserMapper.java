@@ -1,7 +1,7 @@
 package com.example.PatientManagementWeb.mapper;
 
 import com.example.PatientManagementWeb.DTO.UserDTO;
-import com.example.PatientManagementWeb.Entity.User;
+import com.example.PatientManagementWeb.entity.User;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;

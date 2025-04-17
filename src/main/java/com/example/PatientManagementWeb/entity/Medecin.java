@@ -1,19 +1,18 @@
-package com.example.PatientManagementWeb.DTO;
+package com.example.PatientManagementWeb.entity;
 
-import jakarta.validation.constraints.NotBlank;
+import jakarta.persistence.Entity;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 
-
+@Entity
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @SuperBuilder
-public class MedecinDTO extends UserDTO {
+public class Medecin extends User {
 
     private String specialty;
-
-    @NotBlank(message = "localisation is mandatory")
     private String location;
+
 }
